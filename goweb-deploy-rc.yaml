@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: goweb
+  name: goweb-deployment-rc
+  namespace: default
+spec:
+  replicas: 4
+  selector:
+    matchExpressions:
+      - {key: run, operator: In, values: [goweb]}
+      - {key: environment, operator: NotIn, values: [production]}
+  strategy:
+    rollingUpdate:
+      maxSurge: 15% 
+      maxUnavailable: 25% 
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: goweb
+        environment: dev
+    spec:
+      containers:
+      - image: gr0unz/goweb:V1
+        imagePullPolicy: Always
+        name: goweb
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
